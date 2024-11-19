@@ -1,0 +1,61 @@
+package fileManagerApp;
+
+import java.io.*;
+import java.util.Scanner;
+
+public class FileHandler {
+    public static void main(String[] args) {
+        String folderPath = "C:\\Users\\User\\Desktop\\Projects"; // Новое название директории
+        File folder = new File(folderPath);
+
+        if (folder.exists() && folder.isDirectory()) {
+            File[] textFiles = folder.listFiles((dir, name) -> name.endsWith(".txt"));
+
+            System.out.println("Список текстовых файлов в папке:");
+            for (int i = 0; i < textFiles.length; i++) {
+                System.out.println((i + 1) + ". " + textFiles[i].getName());
+            }
+
+            Scanner input = new Scanner(System.in);
+            System.out.print("Выберите номер файла для редактирования: ");
+            int chosenIndex = input.nextInt() - 1;
+
+            if (chosenIndex >= 0 && chosenIndex < textFiles.length) {
+                File chosenFile = textFiles[chosenIndex];
+                System.out.println("\nВыбранный файл: '" + chosenFile.getName() + "'");
+                System.out.println("Содержимое файла:");
+
+                try (BufferedReader fileReader = new BufferedReader(new FileReader(chosenFile))) {
+                    String content;
+                    while ((content = fileReader.readLine()) != null) {
+                        System.out.println(content);
+                    }
+                } catch (IOException e) {
+                    System.out.println("Ошибка при чтении файла: " + e.getMessage());
+                }
+
+                System.out.println("\nВведите текст для добавления в файл. Напишите 'exit', чтобы завершить.");
+                input.nextLine(); // Очистка оставшейся строки
+                try (BufferedWriter fileWriter = new BufferedWriter(new FileWriter(chosenFile, true))) {
+                    String newText;
+                    while (true) {
+                        newText = input.nextLine();
+                        if (newText.equalsIgnoreCase("exit")) {
+                            break;
+                        }
+                        fileWriter.write(newText);
+                        fileWriter.newLine();
+                    }
+                    System.out.println("Изменения успешно сохранены.");
+                } catch (IOException e) {
+                    System.out.println("Ошибка при записи в файл: " + e.getMessage());
+                }
+
+            } else {
+                System.out.println("Неверный номер файла.");
+            }
+        } else {
+            System.out.println("Указанная папка не существует или не является директорией.");
+        }
+    }
+}
